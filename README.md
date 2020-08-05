@@ -33,7 +33,7 @@ webpack using `HtmlWebpackPlugin` which adds a script tag to the `index.html` pa
 So when `index.html` is loaded it executes the client code in `client.js` which renders the React element. 
 
 The basic idea behind SSR is for the server to render the React elements and send the resulting
-HTML to the client. Browser will still load `client.js` bundle but this time client code will call
+HTML to the browser. Browser will still load `client.js` bundle but this time client code will call
 
     ReactDOM.hydrate(element, document.getElementById('root'));
 which will only attach event listeners to the existing DOM elements. 
@@ -88,8 +88,8 @@ Production bundle can be created simply by combining both client and server webp
 
     webpack --config webpack/webpack.config.prod.js
 Check `webpack.config.prod.js` for details. Just like in development configuration, this outputs 
-client bundle into the `build/public` directory (`public` relatively to the server bundle)  
-which is then served by express:
+client bundle into the `build/public` directory (`public` relatively to the server bundle) which is 
+then served by express:
 
     app.use(express.static('public'));
 
