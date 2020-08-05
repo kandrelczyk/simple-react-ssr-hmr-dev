@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { ThemeProvider } from '@material-ui/core/styles';
 import App from './App';
 import theme from './theme';
+import { loadableReady } from '@loadable/component'
 
 function Main() {
   React.useEffect(() => {
@@ -18,6 +19,7 @@ function Main() {
     </ThemeProvider>
   );
 }
-
-const renderMethod = window.INITIAL_STATE.ssr ? ReactDOM.hydrate : ReactDOM.render;
-renderMethod(<Main />, document.querySelector('#root'));
+loadableReady(() => {
+  const renderMethod = window.INITIAL_STATE.ssr ? ReactDOM.hydrate : ReactDOM.render;
+  renderMethod(<Main />, document.querySelector('#root'));
+});

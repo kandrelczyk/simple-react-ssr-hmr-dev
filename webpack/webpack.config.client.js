@@ -10,8 +10,8 @@ client = {
   ...client,
   mode: 'development',
   devtool: 'inline-source-map',
-  watch: true,
   plugins: [
+    ...client.plugins,
     new HtmlWebpackPlugin({
       template: 'src/client/index.html',
       filename: 'index.html',

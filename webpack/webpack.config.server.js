@@ -5,7 +5,7 @@ const findConfig = require('./utils');
 const server = findConfig(config, 'server');
 server.plugins = [
   ...server.plugins,
-  new CleanWebpackPlugin(),
+ // new CleanWebpackPlugin(),
 ];
 
 server.mode = 'development';
