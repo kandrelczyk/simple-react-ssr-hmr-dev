@@ -88,8 +88,8 @@ Production bundle can be created simply by combining both client and server webp
 
     webpack --config webpack/webpack.config.prod.js
 Check `webpack.config.prod.js` for details. Just like in development configuration, this outputs 
-client bundle into the `build/public` directory (`public` relatively to the server bundle)  
-which is then served by express:
+client bundle into the `build/public` directory (`public` relatively to the server bundle) which is 
+then served by express:
 
     app.use(express.static('public'));
 
