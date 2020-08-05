@@ -33,7 +33,7 @@ webpack using `HtmlWebpackPlugin` which adds a script tag to the `index.html` pa
 So when `index.html` is loaded it executes the client code in `client.js` which renders the React element. 
 
 The basic idea behind SSR is for the server to render the React elements and send the resulting
-HTML to the client. Browser will still load `client.js` bundle but this time client code will call
+HTML to the browser. Browser will still load `client.js` bundle but this time client code will call
 
     ReactDOM.hydrate(element, document.getElementById('root'));
 which will only attach event listeners to the existing DOM elements. 
@@ -96,7 +96,7 @@ then served by express:
 #### Styles
 
 After trying out many different solutions I've decided to use Material-UI to create the styles. This
-offers simple way for injecting styles into the HTML generate on server which works both 
+offers simple way for injecting styles into the HTML generated on server which works both 
 for development and production. The setup process is described [here](https://material-ui.com/guides/server-rendering/).
 
 #### Sharing state
