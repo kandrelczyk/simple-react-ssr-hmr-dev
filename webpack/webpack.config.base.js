@@ -1,8 +1,8 @@
 const webpack = require('webpack');
 const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const nodeExternals = require('webpack-node-externals');
 const LoadablePlugin = require('@loadable/webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const client = {
   name: 'client',
@@ -16,20 +16,29 @@ const client = {
         exclude: /node_modules/,
       },
       {
-        test: /\.css$/i,
-        use: ['style-loader', 'css-loader'],
+        test: /\.css$/,
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              hmr: process.env.NODE_ENV === 'development',
+              publicPath: 'css',
+            },
+          },
+          'css-loader',
+        ],
       },
     ],
   },
   resolve: {
     extensions: ['.js', '.jsx'],
   },
-  plugins: [new webpack.ProgressPlugin(), new LoadablePlugin()],
-  output: {
-    path: path.join(__dirname, '../build/public'),
-    publicPath: '',
-    filename: 'client.js',
-  },
+  plugins: [
+    new webpack.ProgressPlugin(),
+    new LoadablePlugin(),
+    new MiniCssExtractPlugin({
+      moduleFilename: ({ name }) => `css/${name}.css`,
+    })],
 };
 
 const server = {
@@ -42,15 +51,15 @@ const server = {
       {test: /\.js?$/, use: 'babel-loader', exclude: /node_modules/},
       {
         test: /\.css$/i,
-        loader: 'css-loader',
-        options: {
-          modules: {
-            exportOnlyLocals: true,
-          },
-        },
-      },],
+        use: [MiniCssExtractPlugin.loader, 'css-loader'],
+      },
+    ],
   },
-  plugins: [new webpack.ProgressPlugin()],
+  plugins: [
+    new webpack.ProgressPlugin(),
+    new MiniCssExtractPlugin({
+      moduleFilename: ({name}) => `public/css/${name}.css`,
+    })],
   output: { path: path.join(__dirname, '../build'), filename: 'server.js' },
 };
 

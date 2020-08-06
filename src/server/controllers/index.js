@@ -1,8 +1,8 @@
 import express from 'express';
-import games from './games';
+import users from './users';
 
 const router = express.Router();
 
-router.use('/game/', games);
+router.use('/user/', users);
 
 export default router;

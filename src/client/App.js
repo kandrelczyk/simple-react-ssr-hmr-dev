@@ -1,6 +1,14 @@
 import React from 'react';
-import Typography from '@material-ui/core/Typography';
-import styles from './App.module.css';
-const App = () => <Typography variant="h3"><div className={styles.error}> Hello world!!</div></Typography>;
+import loadable from '@loadable/component';
+import {Route, Switch} from "react-router-dom";
+
+const FirstComponent = loadable(() => import('./components/FirstComponent'))
+const SecondComponent = loadable(() => import('./components/SecondComponent'))
+
+const App = () =>
+    <Switch>
+        <Route exact path='/' component={FirstComponent} />
+        <Route exact path='/second' component={SecondComponent} />
+    </Switch>;
 
 export default App;

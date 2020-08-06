@@ -10,17 +10,20 @@ let client = findConfig(config, 'client');
 
 client = {
   ...client,
-  mode: 'development',
-  devtool: 'inline-source-map',
   plugins: [
     ...client.plugins,
-    new webpack.HotModuleReplacementPlugin(),
-    new CleanWebpackPlugin(),
+    new HtmlWebpackPlugin({
+      template: 'src/client/index.html',
+      filename: 'index.html',
+      inject: 'body',
+    }),
   ],
-  output: {
-    path: path.join(__dirname, '../build-client/'),
-    publicPath: '',
-    filename: 'client.js',
+  devServer: {
+    host: 'localhost',
+    port: 3001,
+    historyApiFallback: true,
+    hot: true,
+    contentBase: './public',
   },
 };
 

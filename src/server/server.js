@@ -1,12 +1,12 @@
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
-import { ServerStyleSheets, ThemeProvider } from '@material-ui/core/styles';
-import express from 'express'; // Same as our index.html. Replace data in it
+import {ServerStyleSheets, ThemeProvider} from '@material-ui/core/styles';
+import express from 'express';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
-import { ChunkExtractor } from '@loadable/server'
+import {ChunkExtractor} from '@loadable/server'
+import {StaticRouter} from "react-router-dom";
 import path from 'path'
-import fs from 'fs';
 import controllers from './controllers';
 import App from '../client/App';
 import theme from '../client/theme';
@@ -40,48 +40,36 @@ function renderFullPage(html, css, extractor, initialState) {
 
 const app = express();
 
-if (process.env.NODE_ENV === 'development') {
-    app.use(express.static('build/public'));
-}
-
 app.use(express.static('public'));
 app.use(cookieParser());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
+app.use('/', controllers);
 let statsFile;
 if (process.env.NODE_ENV === 'development') {
-    let statsReady = false;
-    while (!statsReady) {
-        try {
-            fs.statSync('./build/public/loadable-stats.json');
-            statsReady = true;
-        } catch (err) {
-            console.log("Waiting for stats file.", err)
-
-        }
-    }
-    statsFile = path.resolve('./build/public/loadable-stats.json');
+    app.use(express.static('build-client'));
+    statsFile = path.resolve('./build-client/loadable-stats.json');
 } else {
     statsFile = path.resolve('./public/loadable-stats.json');
 }
-const extractor = new ChunkExtractor({ statsFile })
 
-app.use('/', controllers);
 app.get('*', (req, res) => {
+    const extractor = new ChunkExtractor({statsFile});
+
     const jsx = extractor.collectChunks(
-        <ThemeProvider theme={theme}>
-            <App />
-        </ThemeProvider>);
+        <StaticRouter location={req.url}>
+            <ThemeProvider theme={theme}>
+                <App/>
+            </ThemeProvider>
+        </StaticRouter>);
     const sheets = new ServerStyleSheets();
     const element = ReactDOMServer.renderToString(
         sheets.collect(jsx)
     );
     const css = sheets.toString();
 
-    const scriptTags = extractor.getScriptTags();
-
-    const renderedData = renderFullPage(element, css, extractor, { ssr: true });
+    const renderedData = renderFullPage(element, css, extractor, {ssr: true});
     return res.send(renderedData);
 });
 

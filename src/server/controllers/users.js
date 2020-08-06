@@ -2,8 +2,8 @@ import express from 'express';
 
 const router = express.Router();
 
-router.get('/new', (req, res) => {
-  res.send('Wolf, Fox, Eagle!');
+router.get('/create', (req, res) => {
+  res.send('Creating new user...');
 });
 
 export default router;
