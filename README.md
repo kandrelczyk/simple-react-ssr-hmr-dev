@@ -67,8 +67,8 @@ use ES6 syntax in the sever code. As `node-hot` cannot perform HMR on the main m
 
 For the client we simply run 
 
-    webpack --config webpack/webpack.config.client.js
-Client development configuration is setup to output the client bundle into `build/public` directory
+    webpack --watch --config webpack/webpack.config.client.js
+Client development configuration is setup to output the client bundle into `build-client` directory
 which is then served by the express server:
 
     if (process.env.NODE_ENV === 'development') {
@@ -77,9 +77,9 @@ which is then served by the express server:
 
 Thanks to this the bundle can be loaded by the browser and the DOM can be hydrated by React.
 
-The same client configuration can be used to start just the client using `webpack-dev-server`:
+By adding `HtmlWebpackPlugin` and server configuration we can run the client using `webpack-dev-server`:
 
-    webpack-dev-server --config webpack/webpack.config.client.js
+    webpack-dev-server --config webpack/webpack.config.client.dev.server.js
     
 
 #### Production
@@ -140,12 +140,13 @@ and then inside the HTML:
        ${extractor.getScriptTags()}
      </body>
       
-For Material-UI, first:
+For Material-UI, first do:
 
       const sheets = new ServerStyleSheets();
       const element = ReactDOMServer.renderToString(
          sheets.collect(jsx)
       );
+      const css = sheets.toString();
 
 and inside HTML:
 
