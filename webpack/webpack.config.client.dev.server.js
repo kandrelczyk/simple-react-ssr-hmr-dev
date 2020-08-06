@@ -1,7 +1,4 @@
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const path = require('path');
 
 const config = require('./webpack.config.base');
 const findConfig = require('./utils');
