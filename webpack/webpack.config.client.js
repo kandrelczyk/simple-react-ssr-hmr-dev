@@ -1,6 +1,7 @@
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const webpack = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const path = require('path');
+
 const config = require('./webpack.config.base');
 const findConfig = require('./utils');
 
@@ -10,22 +11,15 @@ client = {
   ...client,
   mode: 'development',
   devtool: 'inline-source-map',
-  watch: true,
   plugins: [
-    new HtmlWebpackPlugin({
-      template: 'src/client/index.html',
-      filename: 'index.html',
-      inject: 'body',
-    }),
+    ...client.plugins,
     new webpack.HotModuleReplacementPlugin(),
     new CleanWebpackPlugin(),
   ],
-  devServer: {
-    host: 'localhost',
-    port: 3001,
-    historyApiFallback: true,
-    hot: true,
-    contentBase: './public',
+  output: {
+    path: path.join(__dirname, '../build-client/'),
+    publicPath: '',
+    filename: 'client.js',
   },
 };
 

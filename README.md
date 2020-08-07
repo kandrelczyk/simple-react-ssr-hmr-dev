@@ -67,19 +67,19 @@ use ES6 syntax in the sever code. As `node-hot` cannot perform HMR on the main m
 
 For the client we simply run 
 
-    webpack --config webpack/webpack.config.client.js
-Client development configuration is setup to output the client bundle into `build/public` directory
+    webpack --watch --config webpack/webpack.config.client.js
+Client development configuration is setup to output the client bundle into `build-client` directory
 which is then served by the express server:
 
     if (process.env.NODE_ENV === 'development') {
-      app.use(express.static('build/public'));
+        app.use(express.static('build-client'));
     }
 
 Thanks to this the bundle can be loaded by the browser and the DOM can be hydrated by React.
 
-The same client configuration can be used to start just the client using `webpack-dev-server`:
+By adding `HtmlWebpackPlugin` and server configuration we can run the client using `webpack-dev-server`:
 
-    webpack-dev-server --config webpack/webpack.config.client.js
+    webpack-dev-server --config webpack/webpack.config.client.dev.server.js
     
 
 #### Production
@@ -93,12 +93,74 @@ then served by express:
 
     app.use(express.static('public'));
 
+#### Code splitting
+
+Loadable components are used for code splitting. This is the state of the art solution at the time
+of writing this and is not used in any of the starter projects I've seen. The setup is described
+[here](https://loadable-components.com/docs/server-side-rendering/). The chunk extractor which
+selects proper chunks depending on the rendered components requires `loadable-stats.json` file
+generated when processing client bundle. To make it work in development mode the client bundle is
+generated first and then both client and server processes are run in parallel:
+
+    "start:server": "NODE_ENV=development node-hot --config webpack/webpack.config.server.js",
+    "start:client-watch": "webpack --watch --config webpack/webpack.config.client.js",
+    "start": "webpack --config webpack/webpack.config.client.js && npm-run-all --parallel start:client-watch start:server",
+
+Because both client and server are using `CleanWebpackPlugin`, two different directories are used for 
+client and server bundles. Depending on the NODE_ENV variable, server will load stats generated 
+by development or production builds:
+
+    if (process.env.NODE_ENV === 'development') {
+        statsFile = path.resolve('./build-client/loadable-stats.json');
+    } else {
+        statsFile = path.resolve('./public/loadable-stats.json');
+    }
+
 #### Styles
 
-After trying out many different solutions I've decided to use Material-UI to create the styles. This
-offers simple way for injecting styles into the HTML generate on server which works both 
-for development and production. The setup process is described [here](https://material-ui.com/guides/server-rendering/).
+Loadable components also splits CSS into chunks. To extract them `mini-css-extract-plugin` needs to
+be added to webpack configuration. 
 
+SSR implementation from Material-UI is also compatible with loadable components. 
+The setup process is described [here](https://material-ui.com/guides/server-rendering/).
+
+The idea behind both solutions is the same. When rendering elements all dependencies are 
+gathered and can be accessed by the provided API. Those can be then injected into the HTML returned
+by server. For loadable components use:
+
+      const extractor = new ChunkExtractor({statsFile});
+      const jsx = extractor.collectChunks(<App/>);
+and then inside the HTML:
+
+    <head>
+       ${extractor.getLinkTags()}
+       ${extractor.getStyleTags()}
+     </head>
+     <body>
+       ${extractor.getScriptTags()}
+     </body>
+      
+For Material-UI, first do:
+
+      const sheets = new ServerStyleSheets();
+      const element = ReactDOMServer.renderToString(
+         sheets.collect(jsx)
+      );
+      const css = sheets.toString();
+
+and inside HTML:
+
+    <style id="jss-server-side">
+       ${css}
+    </style>
+    
+    
+#### Routing
+
+`react-router-dom` is compatible will all previously described solutions and adding it is 
+straightforward. Simply use `StaticRouter` in the server and `BrowserRouter` in the client.
+Loadable components will automatically only select chunks used by rendered `Route`. 
+    
 #### Sharing state
 
 To share the state between server and client the server does:
